@@ -1,0 +1,68 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pm2 status)",
+      "Bash(pm2 logs *)",
+      "Bash(pm2 restart *)",
+      "Bash(git status)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(python3 -m py_compile *)",
+      "Bash(python3 ops/websearch.py *)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "FILE=$(echo \"$HOOK_TOOL_INPUT\" | python3 -c \"import json,sys; d=json.load(sys.stdin); print(d.get('file_path',''))\" 2>/dev/null); if [[ \"$FILE\" == *.py ]]; then python3 -m py_compile \"$FILE\" 2>&1 && echo \"✓ syntax ok: $FILE\" || echo \"✗ SYNTAX ERROR in $FILE\"; fi"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "FILE=$(echo \"$HOOK_TOOL_INPUT\" | python3 -c \"import json,sys; d=json.load(sys.stdin); print(d.get('file_path',''))\" 2>/dev/null); if [[ \"$FILE\" == *\".env\" && \"$FILE\" != *\".env.example\"* ]]; then echo \"Blocked: direct writes to .env are not allowed. Edit manually.\" >&2; exit 2; fi"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cat /Users/ZacsMacBook/Documents/OperatorOS/.claude/compact-reminder.md 2>/dev/null || true; if [[ -f TASK.md ]]; then echo ''; echo '--- TASK BRIEF (from TASK.md) ---'; cat TASK.md; echo '--- END BRIEF ---'; fi"
+          }
+        ]
+      },
+      {
+        "matcher": "startup|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [[ -f TASK.md ]]; then echo '--- TASK BRIEF ---'; cat TASK.md; echo '--- END BRIEF ---'; fi"
+          }
+        ]
+      },
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"$(git rev-parse --show-toplevel 2>/dev/null)\" 2>/dev/null && git remote get-url upstream &>/dev/null 2>&1 && git fetch upstream --quiet 2>/dev/null && BEHIND=$(git rev-list HEAD..upstream/main --count 2>/dev/null || echo 0) && [ \"$BEHIND\" -gt 0 ] && echo \"\" && echo \"OperatorOS update available ($BEHIND new commit(s)). Run: bash scripts/update.sh\" && echo \"\" || true",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

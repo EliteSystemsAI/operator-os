@@ -1,0 +1,21 @@
+requests
+python-telegram-bot[job-queue]>=21.0
+
+# OperatorOS — Telegram AI Command Bot
+aiogram>=3.4
+apscheduler>=3.10
+claude-agent-sdk>=0.1
+markdown>=3.5
+openai>=1.0
+matplotlib>=3.8
+anthropic>=0.40.0
+fastapi>=0.115.0
+uvicorn[standard]>=0.32.0
+pydantic>=2.0.0
+google-auth>=2.30.0
+google-auth-oauthlib>=1.2.0
+google-api-python-client>=2.130.0
+playwright>=1.40.0
+pillow>=10.0.0
+stripe>=7.0.0
+ddgs>=0.3

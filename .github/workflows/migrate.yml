@@ -1,0 +1,34 @@
+name: Run Supabase Migrations
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "migrations/**.sql"
+  workflow_dispatch:
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run migrations via Supabase API
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: |
+          for file in $(ls migrations/*.sql | sort); do
+            echo "Applying $file..."
+            RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
+              "https://api.supabase.com/v1/projects/bsjuquawicyqvivevnrt/database/query" \
+              -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
+              -H "Content-Type: application/json" \
+              --data-binary "{\"query\": $(python3 -c "import json,sys; print(json.dumps(open('$file').read()))")}")
+            HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+            BODY=$(echo "$RESPONSE" | head -n-1)
+            if [ "$HTTP_CODE" != "200" ] && [ "$HTTP_CODE" != "201" ]; then
+              echo "FAILED $file (HTTP $HTTP_CODE): $BODY"
+              exit 1
+            fi
+            echo "Done: $file"
+          done

@@ -1,0 +1,36 @@
+.env
+.env.local
+*.env
+
+# Generated output (large image files)
+output/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# macOS
+.DS_Store
+
+# Playwright logs
+.playwright-mcp/
+
+# Drive ID file (local only)
+.drive_root_id
+
+# Personal/runtime files (not for template distribution)
+tasks/
+memory/
+content/
+csa-app-login.png
+telegram-*.png
+hormozi-*.png
+tyler_*.png
+post*.png
+yt-carousel.png
+*.png
+*.jpg
+
+# Local MCP config (has auth tokens)
+.mcp.json

@@ -1,0 +1,35 @@
+name: Client Health Check (Daily Fallback)
+
+on:
+  schedule:
+    # 11pm UTC = 9am AEST (QLD, UTC+10, no DST)
+    # Belt-and-suspenders fallback — Railway worker is the primary always-on process
+    - cron: "0 23 * * *"
+  workflow_dispatch: # manual trigger from GitHub UI
+
+jobs:
+  health-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Write credentials to .env
+        env:
+          GHL_AGENCY_API_KEY: ${{ secrets.GHL_AGENCY_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          printf '%s\n' \
+            "GHL_AGENCY_API_KEY=$GHL_AGENCY_API_KEY" \
+            "TELEGRAM_BOT_TOKEN=$TELEGRAM_BOT_TOKEN" \
+            "TELEGRAM_CHAT_ID=$TELEGRAM_CHAT_ID" > .env
+
+      - name: Run client health check
+        run: python ops/client_health_check.py

@@ -1,0 +1,42 @@
+name: Weekly Ops Digest
+
+on:
+  schedule:
+    # Every Monday at 10pm UTC = Tuesday 8am AEST (QLD, no DST)
+    - cron: "0 22 * * 0"
+  workflow_dispatch: # manual trigger from GitHub UI
+
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Write credentials to .env
+        env:
+          STRIPE_API_KEY:            ${{ secrets.STRIPE_API_KEY }}
+          GHL_API_KEY:               ${{ secrets.GHL_API_KEY }}
+          GHL_LOCATION_ID:           ${{ secrets.GHL_LOCATION_ID }}
+          TELEGRAM_BOT_TOKEN:        ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID:          ${{ secrets.TELEGRAM_CHAT_ID }}
+          SUPABASE_URL:              ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          printf '%s\n' \
+            "STRIPE_API_KEY=$STRIPE_API_KEY" \
+            "GHL_API_KEY=$GHL_API_KEY" \
+            "GHL_LOCATION_ID=$GHL_LOCATION_ID" \
+            "TELEGRAM_BOT_TOKEN=$TELEGRAM_BOT_TOKEN" \
+            "TELEGRAM_CHAT_ID=$TELEGRAM_CHAT_ID" \
+            "SUPABASE_URL=$SUPABASE_URL" \
+            "SUPABASE_SERVICE_ROLE_KEY=$SUPABASE_SERVICE_ROLE_KEY" > .env
+
+      - name: Run digest
+        run: python ops/weekly_ops_digest.py
