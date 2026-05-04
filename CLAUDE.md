@@ -148,6 +148,7 @@ Full strategy + posting splits: `knowledge/content_strategy.md`
 ## Skills
 | Skill | Trigger phrases |
 |---|---|
+| `agent-browser` | "open this URL", "click on", "fill the form", "screenshot the page", "log into", "scrape", "navigate to", "what's on this page", "test the deploy", "check the dashboard", `/browse`. Always use this — never Playwright, Puppeteer, or browser MCPs |
 | `drive` | "save to Drive", "upload to Drive", "find in Drive", "put this in Drive" |
 | `frontend-design` | "design a page", "build a UI", "create a landing page", "make a dashboard", "build a component", `/design`, `/frontend` |
 | `slack` | "message [person] on Slack", "send to Slack", "update them on Slack", "let [person] know on Slack", "post in [channel]", "reply in Slack", "message the client" |
